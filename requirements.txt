@@ -2,7 +2,6 @@ django-allauth==0.58.2
 django-crispy-forms==2.1
 crispy-bootstrap5==2023.10
 django-countries==7.5.1
-django-stripe==1.1.1
 python-dotenv==1.0.0
 pillow==10.1.0
 gunicorn==21.2.0
