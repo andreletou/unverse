@@ -1,0 +1,762 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static "css/main.css" %}">
+
+<!-- Hero Banner - Modern Design -->
+<section class="relative bg-gradient-to-r from-amazon-blue to-amazon-orange overflow-hidden">
+    <div class="container mx-auto px-4 py-16 lg:py-24">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <!-- Hero Content -->
+            <div class="lg:w-1/2 text-center lg:text-left mb-8 lg:mb-0">
+                <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                    L'élégance technologique<br>
+                    <span class="text-amazon-orange">à portée de main</span>
+                </h1>
+                <p class="text-xl text-white/90 mb-8 max-w-2xl">
+                    Découvrez notre sélection premium de produits high-tech aux meilleurs prix avec livraison express au Togo
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <a href="{% url 'core:product_list' %}" class="bg-amazon-btn hover:bg-yellow-500 text-amazon-text font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Explorer la boutique
+                    </a>
+                    <a href="#trending" class="border-2 border-white text-white hover:bg-white hover:text-amazon-dark font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300">
+                        Voir les tendances
+                    </a>
+                </div>
+                
+                <!-- Trust Badges -->
+                <div class="flex flex-wrap gap-6 mt-12 justify-center lg:justify-start">
+                    <div class="flex items-center text-white/80">
+                        <i class="fas fa-shipping-fast text-2xl mr-3"></i>
+                        <span>Livraison 24-48h</span>
+                    </div>
+                    <div class="flex items-center text-white/80">
+                        <i class="fas fa-shield-alt text-2xl mr-3"></i>
+                        <span>Garantie 2 ans</span>
+                    </div>
+                    <div class="flex items-center text-white/80">
+                        <i class="fas fa-lock text-2xl mr-3"></i>
+                        <span>Paiement sécurisé</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hero Image -->
+            <div class="lg:w-1/2 relative">
+                <div class="relative z-10">
+                    <img src="{% static 'img/ent.png' %}" alt="Produits high-tech" 
+                         class="w-full max-w-lg mx-auto transform hover:scale-105 transition-transform duration-500 rounded-2xl shadow-2xl">
+                </div>
+                <!-- Floating Elements -->
+                <div class="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full opacity-20 animate-pulse"></div>
+                <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-400 rounded-full opacity-20 animate-pulse delay-1000"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wave Divider -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-12">
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" 
+                  opacity=".25" class="fill-current text-white"></path>
+            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" 
+                  opacity=".5" class="fill-current text-white"></path>
+            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" 
+                  class="fill-current text-white"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Value Propositions - Modern Grid -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
+                    <i class="fas fa-truck-fast text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-amazon-dark mb-3">Livraison Express</h3>
+                <p class="text-gray-600">Recevez vos produits en 24-48h dans tout le Togo</p>
+            </div>
+            
+            <div class="text-center group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-green-500/25 transition-all duration-300">
+                    <i class="fas fa-shield-alt text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-amazon-dark mb-3">Garantie 2 ans</h3>
+                <p class="text-gray-600">Tous nos produits sont couverts par notre garantie premium</p>
+            </div>
+            
+            <div class="text-center group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-purple-500/25 transition-all duration-300">
+                    <i class="fas fa-lock text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-amazon-dark mb-3">Paiement Sécurisé</h3>
+                <p class="text-gray-600">Transactions cryptées et protection des données</p>
+            </div>
+            
+            <div class="text-center group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-orange-500/25 transition-all duration-300">
+                    <i class="fas fa-headset text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-amazon-dark mb-3">Support 24/7</h3>
+                <p class="text-gray-600">Assistance technique disponible par WhatsApp</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="py-16 bg-amazon-gray">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-amazon-dark mb-2">Parcourez par catégories</h2>
+                <p class="text-gray-600">Découvrez nos différentes gammes de produits</p>
+            </div>
+            <a href="{% url 'core:product_list' %}" class="hidden lg:flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Toutes les catégories
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {% for category in main_categories %}
+            <a href="{% url 'core:product_list_by_category' category.slug %}" 
+               class="bg-white rounded-2xl p-6 text-center group hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-300 border border-gray-100">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl mx-auto mb-4 flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-10 h-10 object-contain">
+                    {% else %}
+                    <i class="fas {{ category.icon|default:'fa-mobile-alt' }} text-2xl text-blue-600"></i>
+                    {% endif %}
+                </div>
+                <h3 class="font-semibold text-amazon-dark mb-2 group-hover:text-amazon-blue transition-colors duration-300">
+                    {{ category.name }}
+                </h3>
+                <p class="text-sm text-gray-500">{{ category.products.count }} produits</p>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-folder-open text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Aucune catégorie disponible pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Mobile View All Button -->
+        <div class="lg:hidden text-center mt-8">
+            <a href="{% url 'core:product_list' %}" class="inline-flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Toutes les catégories
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Daily Deals -->
+<section class="py-16 bg-gradient-to-r from-red-50 to-orange-50">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12">
+            <div class="mb-6 lg:mb-0">
+                <h2 class="text-3xl font-bold text-amazon-dark mb-4">Offres du jour</h2>
+                <div class="flex items-center space-x-4 bg-white rounded-2xl px-6 py-3 shadow-lg">
+                    <span class="text-gray-600 font-semibold">Fin dans:</span>
+                    <div class="flex space-x-2 text-2xl font-mono font-bold text-red-600">
+                        <span id="hours" class="bg-red-100 px-3 py-1 rounded-lg">12</span>
+                        <span>:</span>
+                        <span id="minutes" class="bg-red-100 px-3 py-1 rounded-lg">45</span>
+                        <span>:</span>
+                        <span id="seconds" class="bg-red-100 px-3 py-1 rounded-lg">30</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'core:product_list' %}?on_sale=true" 
+               class="flex items-center bg-white hover:bg-gray-50 text-amazon-dark font-semibold py-3 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
+                Toutes les offres
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in discounted_products|slice:":4" %}
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group relative">
+                <div class="absolute top-4 left-4 z-10">
+                    <div class="bg-red-600 text-white font-bold py-1 px-3 rounded-full text-sm shadow-lg">
+                        -{{ product.get_discount_percentage }}%
+                    </div>
+                </div>
+                {% include 'products/product_card.html' with product=product %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-tag text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Aucune offre spéciale pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Trending Products -->
+<section class="py-16 bg-white" id="trending">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-amazon-dark mb-4">Tendances du moment</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Les produits les plus populaires cette semaine
+            </p>
+        </div>
+        
+        <div class="relative">
+            <div class="flex overflow-x-auto pb-8 scrollbar-hide space-x-6 snap-x snap-mandatory">
+                {% for product in trending_products %}
+                <div class="flex-shrink-0 w-80 snap-center">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 group relative">
+                        <div class="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-2 px-4 rounded-full text-sm shadow-lg z-10">
+                            <i class="fas fa-bolt mr-1"></i> N°{{ forloop.counter }}
+                        </div>
+                        {% include 'products/product_card.html' with product=product %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="flex-shrink-0 w-full text-center py-12">
+                    <i class="fas fa-chart-line text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500">Aucun produit tendance pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Premium Selection -->
+<section class="py-16 bg-gradient-to-r from-gray-900 to-amazon-dark text-white">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <div class="lg:w-1/2 text-center lg:text-left mb-8 lg:mb-0">
+                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-amazon-dark font-bold py-2 px-4 rounded-full text-sm inline-block mb-6">
+                    Collection Exclusive
+                </span>
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6">UniversePro Elite</h2>
+                <p class="text-xl text-gray-300 mb-8 max-w-xl">
+                    Découvrez notre sélection haut de gamme pour une expérience technologique inégalée
+                </p>
+                <a href="{% url 'core:product_list' %}?premium=true" 
+                   class="inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-amazon-dark font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105">
+                    Découvrir la collection
+                    <i class="fas fa-arrow-right ml-3"></i>
+                </a>
+            </div>
+            <div class="lg:w-1/2 relative">
+                <img src="{% static 'img/premium-device.png' %}" alt="Produit premium" 
+                     class="w-full max-w-lg mx-auto transform hover:scale-105 transition-transform duration-500">
+                <!-- Floating elements -->
+                <div class="absolute -top-4 -left-4 w-8 h-8 bg-yellow-400 rounded-full opacity-50 animate-bounce"></div>
+                <div class="absolute -bottom-4 -right-4 w-12 h-12 bg-blue-400 rounded-full opacity-50 animate-bounce delay-1000"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- New Arrivals -->
+<section class="py-16 bg-amazon-gray">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-amazon-dark mb-2">Nouveautés</h2>
+                <p class="text-gray-600">Les derniers produits ajoutés à notre catalogue</p>
+            </div>
+            <a href="{% url 'core:product_list' %}?new=true" 
+               class="hidden lg:flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Voir tout
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for product in new_products|slice:":6" %}
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group relative">
+                <div class="absolute top-4 right-4 z-10">
+                    <div class="bg-green-500 text-white font-bold py-1 px-3 rounded-full text-sm shadow-lg">
+                        Nouveau
+                    </div>
+                </div>
+                {% include 'products/product_card.html' with product=product %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-box-open text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Aucun nouveau produit pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Mobile View All Button -->
+        <div class="lg:hidden text-center mt-8">
+            <a href="{% url 'core:product_list' %}?new=true" 
+               class="inline-flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Voir tout
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-12">
+            <div>
+                <h2 class="text-3xl font-bold text-amazon-dark mb-2">Produits Populaires</h2>
+                <p class="text-gray-600">Les produits les plus appréciés par nos clients</p>
+            </div>
+            <a href="{% url 'core:product_list' %}?featured=true" 
+               class="hidden lg:flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Voir tout
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in featured_products|slice:":8" %}
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group">
+                {% include 'products/product_card.html' with product=product %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-star text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Aucun produit populaire pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Mobile View All Button -->
+        <div class="lg:hidden text-center mt-8">
+            <a href="{% url 'core:product_list' %}?featured=true" 
+               class="inline-flex items-center text-amazon-blue hover:text-amazon-orange font-semibold transition-colors duration-300">
+                Voir tout
+                <i class="fas fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Customer Testimonials -->
+<section class="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-amazon-dark mb-4">Nos clients témoignent</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Découvrez les expériences de nos clients satisfaits
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for review in reviews|slice:":3" %}
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center mb-6">
+                    <div class="flex text-yellow-400 mr-4">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star text-xl"></i>
+                            {% else %}
+                                <i class="far fa-star text-xl"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="text-gray-500 text-sm">{{ review.created_at|date:"d M Y" }}</span>
+                </div>
+                <p class="text-gray-700 text-lg mb-6 italic">"{{ review.comment }}"</p>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
+                        {{ review.user.username|first|upper }}
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-amazon-dark">{{ review.user.username }}</h4>
+                        <p class="text-gray-500 text-sm">Client UniversePro</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-comments text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500 mb-4">Soyez le premier à donner votre avis!</p>
+                <a href="#" class="inline-flex items-center text-amazon-blue hover:text-amazon-orange font-semibold">
+                    Laisser un avis
+                    <i class="fas fa-chevron-right ml-2"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Brand Showcase -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-amazon-dark mb-4">Nos marques partenaires</h2>
+            <p class="text-gray-600">Nous collaborons avec les plus grandes marques du marché</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {% with brands="apple samsung xoami ing el yaki" %}
+            {% for brand in brands.split %}
+            <div class="bg-gray-50 rounded-2xl p-6 flex items-center justify-center group hover:bg-white hover:shadow-lg transition-all duration-300">
+                <img src="{% static 'img/'|add:brand|add:'.png' %}" alt="{{ brand|title }}" 
+                     class="h-12 object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0">
+            </div>
+            {% endfor %}
+            {% endwith %}
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Subscription -->
+<section class="py-16 bg-gradient-to-r from-amazon-blue to-blue-700 text-white">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <div class="lg:w-1/2 text-center lg:text-left mb-8 lg:mb-0">
+                <h2 class="text-3xl lg:text-4xl font-bold mb-4">Restez connectés</h2>
+                <p class="text-xl text-blue-100 mb-8 max-w-xl">
+                    Abonnez-vous à notre newsletter pour recevoir des offres exclusives et les dernières nouveautés tech
+                </p>
+                <form class="newsletter-form" action="{% url 'core:newsletter_subscribe' %}" method="post">
+                    {% csrf_token %}
+                    <div class="flex flex-col sm:flex-row gap-4 max-w-md">
+                        <input type="email" name="email" placeholder="Votre adresse email" 
+                               class="flex-1 px-6 py-4 rounded-2xl text-amazon-dark placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300">
+                        <button type="submit" 
+                                class="bg-amazon-orange hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 whitespace-nowrap">
+                            S'abonner
+                        </button>
+                    </div>
+                    <div class="mt-4 text-blue-200 text-sm">
+                        En vous abonnant, vous acceptez notre 
+                        <a href="{% url 'core:privacy' %}" class="underline hover:text-white transition-colors duration-300">
+                            Politique de confidentialité
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="lg:w-1/2 flex justify-center">
+                <img src="{% static 'img/new.png' %}" alt="Newsletter" 
+                     class="w-full max-w-md transform hover:scale-105 transition-transform duration-500">
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Countdown timer for daily deals - Modern version
+    function updateCountdown() {
+        const now = new Date();
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 0);
+        
+        const diff = endOfDay - now;
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+        document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        
+        // Add pulse animation when time is running out
+        if (hours === 0 && minutes < 30) {
+            document.querySelector('.countdown-timer').classList.add('animate-pulse');
+        }
+    }
+    
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Enhanced AJAX for interactive features
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                }
+            });
+        }, observerOptions);
+
+        // Observe sections for animation
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Enhanced favorite functionality
+        document.querySelectorAll('.btn-wishlist').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.dataset.productId;
+                const isActive = this.classList.contains('active');
+                
+                // Add loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                this.disabled = true;
+                
+                fetch(`/api/toggle-favorite/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        this.classList.add('active');
+                        this.innerHTML = '<i class="fas fa-heart"></i>';
+                        showToast('Produit ajouté aux favoris !', 'success');
+                    } else {
+                        this.classList.remove('active');
+                        this.innerHTML = '<i class="far fa-heart"></i>';
+                        showToast('Produit retiré des favoris', 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de la mise à jour', 'error');
+                    this.innerHTML = isActive ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+                })
+                .finally(() => {
+                    this.disabled = false;
+                });
+            });
+        });
+
+        // Enhanced cart functionality
+        document.querySelectorAll('.btn-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.dataset.productId;
+                
+                // Add loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...';
+                this.disabled = true;
+                
+                fetch(`/api/add-to-cart/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update cart count
+                        const cartCount = document.querySelector('.cart-count');
+                        if (cartCount) {
+                            cartCount.textContent = data.cart_items_count;
+                            // Add bounce animation
+                            cartCount.classList.add('animate-bounce');
+                            setTimeout(() => cartCount.classList.remove('animate-bounce'), 1000);
+                        }
+                        
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de l\'ajout au panier', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
+            });
+        });
+
+        // Enhanced toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-2xl shadow-2xl transform transition-all duration-300 translate-x-full`;
+            
+            const typeConfig = {
+                success: { bg: 'bg-green-500', icon: 'fa-check-circle' },
+                error: { bg: 'bg-red-500', icon: 'fa-exclamation-circle' },
+                info: { bg: 'bg-blue-500', icon: 'fa-info-circle' },
+                warning: { bg: 'bg-yellow-500', icon: 'fa-exclamation-triangle' }
+            };
+            
+            const config = typeConfig[type] || typeConfig.success;
+            
+            toast.innerHTML = `
+                <div class="flex items-center space-x-3 text-white">
+                    <i class="fas ${config.icon} text-xl"></i>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+            
+            toast.classList.add(config.bg);
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+                toast.classList.add('translate-x-0');
+            }, 10);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-banner');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Enhanced product card interactions
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Newsletter form enhancement
+        const newsletterForm = document.querySelector('.newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Abonnement...';
+                submitBtn.disabled = true;
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Abonnement réussi ! Merci !', 'success');
+                        this.reset();
+                    } else {
+                        showToast(data.error || 'Erreur lors de l\'abonnement', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de l\'abonnement', 'error');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Custom animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Hide scrollbar for trending products */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Enhanced product card hover effects */
+    .product-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>
+{% endblock %}

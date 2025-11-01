@@ -1,0 +1,856 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UniversePro - Boutique Premium High-Tech{% endblock %}</title>
+    <meta name="description" content="Boutique en ligne de produits high-tech et accessoires premium">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'amazon-orange': '#FF9900',
+                        'amazon-blue': '#146EB4',
+                        'amazon-dark': '#131921',
+                        'amazon-light': '#232F3E',
+                        'amazon-gray': '#EAEDED',
+                        'amazon-text': '#0F1111',
+                    },
+                    fontFamily: {
+                        'amazon': ['Amazon Ember', 'Arial', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/amazon-ember');
+        
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background-color: #EAEDED;
+        }
+        
+        .amazon-header {
+            background: #131921;
+        }
+        
+        .amazon-nav {
+            background: #232F3E;
+        }
+        
+        .amazon-search {
+            background: #FEBE68;
+            border-color: #F3A847;
+        }
+        
+        .amazon-search:hover {
+            background: #F3A847;
+        }
+        
+        .amazon-btn {
+            background: #FFD814;
+            border-color: #FCD200;
+        }
+        
+        .amazon-btn:hover {
+            background: #F7CA00;
+        }
+        
+        .amazon-orange-btn {
+            background: #FFA41C;
+            border-color: #FF8F00;
+        }
+        
+        .amazon-orange-btn:hover {
+            background: #FA8900;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .deal-badge {
+            background: #CC0C39;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        
+        .price {
+            color: #B12704;
+        }
+        
+        .prime-badge {
+            color: #007185;
+            font-size: 14px;
+        }
+        
+        .footer-back-to-top {
+            background: #37475A;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            cursor: pointer;
+        }
+        
+        .footer-back-to-top:hover {
+            background: #485769;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-left: 4px solid #FFA41C;
+        }
+        
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        .cart-count {
+            color: #FF9900;
+            font-weight: bold;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            z-index: 100;
+            min-width: 200px;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Animations personnalisées */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Scrollbar personnalisé */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Messages Django spécifiques */
+        .django-message {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body class="bg-amazon-gray text-amazon-text">
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="django-message">
+        {% for message in messages %}
+        <div class="mb-2 p-4 rounded-md shadow-lg animate-fade-in-up {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                    <span>{{ message }}</span>
+                </div>
+                <button class="ml-4 text-gray-500 hover:text-gray-700 message-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Barre de notification -->
+    <div class="bg-amazon-dark text-white py-1 text-xs">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <p class="flex items-center"><i class="fas fa-truck mr-1"></i> Livraison gratuite à partir de 100 000 FCFA</p>
+                    <p class="hidden md:flex items-center"><i class="fas fa-undo mr-1"></i> Retours faciles sous 14 jours</p>
+                </div>
+                <p class="flex items-center"><i class="fas fa-phone mr-1"></i> +228 930 205 25</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="amazon-header text-white sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <!-- Première ligne du header -->
+            <div class="flex items-center py-2">
+                <!-- Logo -->
+                <div class="flex items-center mr-4">
+                    <a href="{% url 'core:home' %}" class="flex items-center">
+                        <i class="fas fa-rocket text-amazon-orange text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">Universe<span class="text-amazon-orange">Pro</span></span>
+                    </a>
+                </div>
+
+                <!-- Livraison -->
+                <div class="hidden md:flex items-center mr-4 text-xs">
+                    <div class="flex flex-col">
+                        <span class="text-gray-300">Livrer à</span>
+                        <span class="font-bold">Lomé 00000</span>
+                    </div>
+                </div>
+
+                <!-- Barre de recherche -->
+                <form action="{% url 'core:product_list' %}" method="get" class="flex flex-1 max-w-2xl mx-4">
+                    <div class="flex w-full">
+                        <div class="relative flex-1">
+                            <input type="text" name="q" class="w-full py-1 px-3 rounded-l text-black text-sm" placeholder="Rechercher UniversePro" value="{{ request.GET.q }}">
+                            <button type="submit" class="absolute right-0 top-0 h-full px-2 text-gray-500">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="bg-amazon-search hover:bg-amazon-orange px-3 rounded-r text-amazon-dark text-sm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Langue -->
+                <div class="hidden md:flex items-center mr-4">
+                    <div class="flex flex-col items-center text-xs">
+                        <img src="https://flagcdn.com/w20/tg.png" alt="Togo" class="w-5 h-3 mb-1">
+                        <span class="font-bold">FR</span>
+                    </div>
+                </div>
+
+                <!-- Compte -->
+                <div class="dropdown relative mr-4">
+                    <div class="flex flex-col text-xs cursor-pointer py-1 px-2 hover:outline hover:outline-1 hover:outline-white rounded-sm">
+                        <span class="text-gray-300">Bonjour,</span>
+                        <span class="font-bold">
+                            {% if user.is_authenticated %}
+                                {{ user.first_name|default:user.username }}
+                            {% else %}
+                                Identifiez-vous
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="dropdown-menu right-0 mt-1 p-2">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'core:order_history' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">Mon compte</a>
+                        <a href="{% url 'core:order_history' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">Mes commandes</a>
+                        <a href="{% url 'core:address_list' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">Mes adresses</a>
+                        <a href="{% url 'core:wishlist' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">Ma liste de souhaits</a>
+                        <a href="{% url 'core:logout' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">Déconnexion</a>
+                        {% else %}
+                        <a href="{% url 'core:login' %}" class="block py-1 px-2 hover:bg-amazon-gray rounded">S'identifier</a>
+                        <a href="#" class="block py-1 px-2 hover:bg-amazon-gray rounded">Nouveau client?</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Retours et Commandes -->
+                <div class="hidden md:flex flex-col text-xs mr-4">
+                    <a href="{% url 'core:order_history' %}" class="hover:text-white">
+                        <span class="text-gray-300">Retours</span>
+                        <span class="font-bold">& Commandes</span>
+                    </a>
+                </div>
+
+                <!-- Favoris -->
+                <div class="hidden md:flex items-center mr-4">
+                    <a href="{% url 'core:favorite_list' %}" class="flex flex-col text-xs hover:text-white">
+                        <span class="text-gray-300">Mes</span>
+                        <span class="font-bold">Favoris</span>
+                    </a>
+                </div>
+
+                <!-- Panier -->
+                <div class="flex items-center">
+                    <a href="{% url 'core:cart_view' %}" class="flex items-center text-amazon-orange font-bold relative">
+                        <i class="fas fa-shopping-cart text-2xl"></i>
+                        <span class="ml-1 cart-count">
+                            {% if request.user.is_authenticated %}
+                                {% with cart=request.user.cart %}
+                                    {{ cart.items.count|default:0 }}
+                                {% endwith %}
+                            {% else %}
+                                {% with session_cart=request.session.cart %}
+                                    {{ session_cart.items.count|default:0 }}
+                                {% endwith %}
+                            {% endif %}
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Deuxième ligne du header (Navigation) -->
+            <div class="amazon-nav flex items-center py-1 text-sm">
+                <!-- Menu mobile -->
+                <div class="flex items-center mr-2 md:hidden">
+                    <button id="mobile-menu-button" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">
+                        <i class="fas fa-bars mr-1"></i>
+                        <span>Tout</span>
+                    </button>
+                </div>
+
+                <!-- Navigation principale -->
+                <div class="hidden md:flex items-center space-x-4 overflow-x-auto">
+                    <a href="{% url 'core:product_list' %}?sort_by=popular" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">Meilleures Ventes</a>
+                    <a href="{% url 'core:product_list' %}?sort_by=newest" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">Nouveautés</a>
+                    <a href="{% url 'core:product_list' %}?featured=true" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">Produits Premium</a>
+                    <a href="{% url 'core:contact' %}" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">Service Client</a>
+                    <a href="#" class="px-2 py-1 hover:outline hover:outline-1 hover:outline-white rounded-sm">Cartes Cadeaux</a>
+                </div>
+
+                <!-- Offres du moment -->
+                <div class="ml-auto">
+                    <a href="{% url 'core:product_list' %}?on_sale=true" class="px-2 py-1 text-amazon-orange font-bold hover:outline hover:outline-1 hover:outline-amazon-orange rounded-sm">
+                        Offres du moment
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="mobile-menu fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 md:hidden overflow-y-auto">
+            <div class="p-4 bg-amazon-dark text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-circle text-2xl mr-2"></i>
+                        <span class="font-bold">
+                            {% if user.is_authenticated %}
+                                Bonjour, {{ user.first_name|default:user.username }}
+                            {% else %}
+                                Bonjour, identifiez-vous
+                            {% endif %}
+                        </span>
+                    </div>
+                    <button id="close-mobile-menu" class="text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <h3 class="font-bold text-lg mb-3">Navigation</h3>
+                <ul class="space-y-2 mb-6">
+                    <li><a href="{% url 'core:home' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Accueil</a></li>
+                    <li><a href="{% url 'core:product_list' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Tous les produits</a></li>
+                    <li><a href="{% url 'core:product_list' %}?sort_by=popular" class="block py-2 hover:bg-amazon-gray rounded px-2">Meilleures Ventes</a></li>
+                    <li><a href="{% url 'core:product_list' %}?sort_by=newest" class="block py-2 hover:bg-amazon-gray rounded px-2">Nouveautés</a></li>
+                    <li><a href="{% url 'core:product_list' %}?on_sale=true" class="block py-2 hover:bg-amazon-gray rounded px-2">Offres du moment</a></li>
+                </ul>
+                
+                {% if user.is_authenticated %}
+                <h3 class="font-bold text-lg mb-3">Mon Compte</h3>
+                <ul class="space-y-2 mb-6">
+                    <li><a href="{% url 'core:order_history' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Mes commandes</a></li>
+                    <li><a href="{% url 'core:favorite_list' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Mes favoris</a></li>
+                    <li><a href="{% url 'core:wishlist' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Liste de souhaits</a></li>
+                    <li><a href="{% url 'core:address_list' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Mes adresses</a></li>
+                </ul>
+                {% endif %}
+                
+                <h3 class="font-bold text-lg mb-3">Catégories</h3>
+                <ul class="space-y-2">
+                    {% for category in main_categories %}
+                    <li>
+                        <a href="{% url 'core:product_list_by_category' category.slug %}" class="block py-2 hover:bg-amazon-gray rounded px-2">
+                            <i class="fas {{ category.icon|default:'fa-mobile-alt' }} w-5 mr-2"></i>
+                            {{ category.name }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li class="text-gray-500 py-2">Aucune catégorie disponible</li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="mt-6 pt-4 border-t">
+                    <h3 class="font-bold text-lg mb-3">Support</h3>
+                    <div class="space-y-2">
+                        <a href="{% url 'core:contact' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">Contactez-nous</a>
+                        <a href="{% url 'core:faq' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">FAQ</a>
+                        <a href="{% url 'core:about' %}" class="block py-2 hover:bg-amazon-gray rounded px-2">À propos</a>
+                    </div>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <div class="mt-6 pt-4 border-t">
+                    <a href="{% url 'core:login' %}" class="block w-full bg-amazon-orange text-white text-center py-2 rounded font-bold hover:bg-orange-600">
+                        Se connecter
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Bannière promotionnelle -->
+    <div class="bg-amazon-light text-white py-1 text-center text-sm">
+        <div class="container mx-auto px-4">
+            <p>Économisez sur les produits high-tech - <span class="font-bold">Jusqu'à -30%</span> sur une sélection d'articles. <a href="{% url 'core:product_list' %}?on_sale=true" class="text-amazon-orange underline ml-1">Voir les offres</a></p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}
+        <!-- Contenu par défaut avec style Amazon -->
+        <div class="container mx-auto px-4 py-6">
+            <!-- Carousel Hero -->
+            <div class="bg-gradient-to-r from-amazon-blue to-amazon-orange rounded-lg p-8 mb-6 text-white">
+                <div class="max-w-lg">
+                    <h1 class="text-3xl font-bold mb-4">Bienvenue chez UniversePro</h1>
+                    <p class="mb-6">Votre destination premium pour les produits high-tech. Découvrez nos dernières innovations.</p>
+                    <a href="{% url 'core:product_list' %}" class="inline-block bg-amazon-btn text-amazon-text font-bold py-2 px-6 rounded-md hover:bg-yellow-500 transition">
+                        Découvrir nos produits
+                    </a>
+                </div>
+            </div>
+
+            <!-- Section catégories rapides -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {% for category in main_categories|slice:":4" %}
+                <a href="{% url 'core:product_list_by_category' category.slug %}" class="product-card p-4 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+                        {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-10 h-10 object-contain">
+                        {% else %}
+                        <i class="fas {{ category.icon|default:'fa-mobile-alt' }} text-2xl text-blue-600"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-bold text-sm">{{ category.name }}</h3>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Produits populaires -->
+            <h2 class="text-2xl font-bold mb-4">Produits Populaires</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {% for product in featured_products|slice:":4" %}
+                <div class="product-card p-4">
+                    {% if product.is_on_sale %}
+                    <div class="mb-2">
+                        <span class="deal-badge">-{{ product.get_discount_percentage }}%</span>
+                    </div>
+                    {% endif %}
+                    <a href="{% url 'core:product_detail' product.slug %}">
+                        <img src="{% if product.images.first %}{{ product.images.first.image.url }}{% else %}https://via.placeholder.com/200x150{% endif %}" 
+                             alt="{{ product.name }}" class="w-full h-40 object-contain mb-3">
+                    </a>
+                    <a href="{% url 'core:product_detail' product.slug %}">
+                        <h3 class="font-bold mb-1 text-sm hover:text-amazon-blue">{{ product.name }}</h3>
+                    </a>
+                    <div class="flex items-center mb-1">
+                        <div class="text-yellow-400">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= product.rating %}
+                                    <i class="fas fa-star text-xs"></i>
+                                {% else %}
+                                    <i class="far fa-star text-xs"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-xs text-gray-500 ml-1">({{ product.reviews_count }})</span>
+                    </div>
+                    <div class="price font-bold text-lg mb-1">
+                        {% if product.is_on_sale %}
+                        <span class="text-gray-500 line-through text-sm mr-2">{{ product.original_price }} FCFA</span>
+                        {% endif %}
+                        {{ product.price }} FCFA
+                    </div>
+                    <div class="prime-badge mb-2">
+                        <i class="fas fa-shipping-fast"></i> Livraison GRATUITE
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="btn-cart amazon-btn flex-1 py-1 rounded text-sm font-medium" data-product-id="{{ product.id }}">
+                            <i class="fas fa-cart-plus mr-1"></i> Panier
+                        </button>
+                        <button class="btn-wishlist border border-gray-300 px-2 rounded text-sm hover:bg-gray-100" data-product-id="{{ product.id }}">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-box-open text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500">Aucun produit disponible pour le moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-amazon-light text-white">
+        <!-- Retour en haut -->
+        <div class="footer-back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <span>Retour en haut</span>
+        </div>
+
+        <!-- Liens principaux -->
+        <div class="bg-amazon-dark py-10">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <!-- À découvrir -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">À découvrir</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="{% url 'core:product_list' %}?featured=true" class="hover:text-white hover:underline">Produits Premium</a></li>
+                            <li><a href="{% url 'core:product_list' %}?sort_by=newest" class="hover:text-white hover:underline">Nouveautés</a></li>
+                            <li><a href="{% url 'core:product_list' %}?on_sale=true" class="hover:text-white hover:underline">Promotions</a></li>
+                            <li><a href="{% url 'core:newsletter_subscribe' %}" class="hover:text-white hover:underline">Newsletter</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Faites-vous aider -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Faites-vous aider</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="{% url 'core:order_history' %}" class="hover:text-white hover:underline">Suivre vos commandes</a></li>
+                            <li><a href="#" class="hover:text-white hover:underline">Tarifs de livraison</a></li>
+                            <li><a href="#" class="hover:text-white hover:underline">Retours et remplacements</a></li>
+                            <li><a href="{% url 'core:faq' %}" class="hover:text-white hover:underline">FAQ</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Paiement -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Moyens de paiement</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="#" class="hover:text-white hover:underline">Mobile Money</a></li>
+                            <li><a href="#" class="hover:text-white hover:underline">Paiement à la livraison</a></li>
+                            <li><a href="#" class="hover:text-white hover:underline">Virement bancaire</a></li>
+                            <li><a href="#" class="hover:text-white hover:underline">Cartes de crédit</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- À propos -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">À propos d'UniversePro</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li><a href="{% url 'core:about' %}" class="hover:text-white hover:underline">À propos de nous</a></li>
+                            <li><a href="{% url 'core:contact' %}" class="hover:text-white hover:underline">Contactez-nous</a></li>
+                            <li><a href="{% url 'core:terms' %}" class="hover:text-white hover:underline">Conditions d'utilisation</a></li>
+                            <li><a href="{% url 'core:privacy' %}" class="hover:text-white hover:underline">Politique de confidentialité</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bas de page -->
+        <div class="bg-amazon-dark py-6 border-t border-gray-600">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <a href="{% url 'core:home' %}" class="flex items-center">
+                            <i class="fas fa-rocket text-amazon-orange text-xl mr-2"></i>
+                            <span class="text-lg font-bold">Universe<span class="text-amazon-orange">Pro</span></span>
+                        </a>
+                    </div>
+                    <div class="flex space-x-6 text-xs text-gray-300">
+                        <a href="{% url 'core:terms' %}" class="hover:text-white">Conditions d'utilisation</a>
+                        <a href="{% url 'core:privacy' %}" class="hover:text-white">Politique de confidentialité</a>
+                        <a href="#" class="hover:text-white">Cookies</a>
+                        <a href="#" class="hover:text-white">Annonces personnalisées</a>
+                    </div>
+                </div>
+                <div class="mt-4 text-center text-xs text-gray-400">
+                    <p>© 2025 UniversePro. Tous droits réservés. | <i class="fas fa-phone mx-1"></i> +228 930 205 25 | <i class="fas fa-envelope mx-1"></i> contact@universepro.com</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    {% block extra_js %}{% endblock %}
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            closeMobileMenu.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+
+            // Fermer le menu en cliquant à l'extérieur
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Fonctions communes
+        function updateCartCount(count) {
+            document.querySelectorAll('.cart-count').forEach(el => {
+                el.textContent = count;
+            });
+        }
+
+        function updateFavoriteCount(count) {
+            document.querySelectorAll('.favorites-count').forEach(el => {
+                el.textContent = count;
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification p-4 flex items-center space-x-3`;
+            toast.innerHTML = `
+                <div class="toast-icon ${type === 'success' ? 'text-green-500' : type === 'error' ? 'text-red-500' : 'text-yellow-500'}">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'} text-xl"></i>
+                </div>
+                <div class="toast-message text-amazon-text">${message}</div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Gestion des favoris
+        document.querySelectorAll('.btn-wishlist').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                const isActive = this.classList.contains('active');
+                
+                // État de chargement
+                this.classList.add('loading');
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                fetch(`/api/toggle-favorite/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'added') {
+                        this.classList.add('active');
+                        this.innerHTML = '<i class="fas fa-heart"></i>';
+                        showToast('Produit ajouté aux favoris', 'success');
+                    } else if(data.status === 'removed') {
+                        this.classList.remove('active');
+                        this.innerHTML = '<i class="far fa-heart"></i>';
+                        showToast('Produit retiré des favoris', 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de la mise à jour', 'error');
+                    this.innerHTML = originalHTML;
+                })
+                .finally(() => {
+                    this.classList.remove('loading');
+                });
+            });
+        });
+
+        // Gestion du panier
+        document.querySelectorAll('.btn-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                
+                // État de chargement
+                this.classList.add('loading');
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                fetch(`/api/add-to-cart/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        quantity: 1
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        showToast(data.message, 'success');
+                        updateCartCount(data.cart_items_count);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Erreur lors de l\'ajout au panier', 'error');
+                })
+                .finally(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = originalHTML;
+                });
+            });
+        });
+
+        // Gestion des dropdowns
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('mouseenter', function() {
+                this.querySelector('.dropdown-menu').style.display = 'block';
+            });
+            
+            dropdown.addEventListener('mouseleave', function() {
+                this.querySelector('.dropdown-menu').style.display = 'none';
+            });
+        });
+
+        // CORRECTION : Gestion spécifique des messages Django seulement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fermer les messages Django manuellement
+            document.querySelectorAll('.message-close').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.django-message > div').remove();
+                });
+            });
+
+            // Auto-hide des messages Django après 5 secondes seulement
+            setTimeout(() => {
+                document.querySelectorAll('.django-message > div').forEach(message => {
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 300);
+                });
+            }, 5000);
+        });
+
+        // Intersection Observer pour les animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observer les sections pour l'animation
+        document.querySelectorAll('section, .product-card').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Gestion du scroll pour le header
+        let lastScrollTop = 0;
+        const header = document.querySelector('.amazon-header');
+        
+        if (header) {
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    header.style.transform = 'translateY(-100%)';
+                } else {
+                    header.style.transform = 'translateY(0)';
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+        }
+    </script>
+</body>
+</html>

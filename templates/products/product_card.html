@@ -1,0 +1,819 @@
+{% load static %}
+<div class="product-card" data-product-id="{{ product.id }}">
+    <!-- Badges en haut à gauche -->
+    <div class="product-badges">
+        {% if product.created_at > recent_date %}
+        <span class="badge new">Nouveau</span>
+        {% endif %}
+        {% if product.is_on_sale %}
+        <span class="badge discount">-{{ product.get_discount_percentage }}%</span>
+        {% endif %}
+        {% if product.featured %}
+        <span class="badge featured">Populaire</span>
+        {% endif %}
+        {% if not product.is_available %}
+        <span class="badge out-of-stock">Rupture</span>
+        {% endif %}
+        {% if product.stock_quantity and product.stock_quantity < 10 %}
+        <span class="badge low-stock">Stock bas</span>
+        {% endif %}
+    </div>
+    
+    <!-- Image du produit avec bouton favori -->
+    <div class="product-image">
+        <a href="{% url 'core:product_detail' slug=product.slug %}" class="image-link">
+            {% with product.images.all|first as main_image %}
+            <img src="{% if main_image %}{{ main_image.image.url }}{% else %}{% static 'images/default-product.png' %}{% endif %}" 
+                 alt="{{ product.name }}" 
+                 loading="lazy"
+                 onerror="this.src='{% static 'images/default-product.png' %}'">
+            {% endwith %}
+        </a>
+        
+        {% if user.is_authenticated %}
+        <button class="btn-wishlist {% if product.id in user_favorites %}active{% endif %}" 
+                data-product-id="{{ product.id }}"
+                aria-label="{% if product.id in user_favorites %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+            <i class="{% if product.id in user_favorites %}fas{% else %}far{% endif %} fa-heart"></i>
+        </button>
+        {% else %}
+        <a href="{% url 'core:login' %}?next={{ request.path }}" class="btn-wishlist" aria-label="Connectez-vous pour ajouter aux favoris">
+            <i class="far fa-heart"></i>
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Informations du produit -->
+    <div class="product-info">
+        <!-- Titre et catégorie -->
+        <div class="product-meta">
+            {% if product.category %}
+            <span class="product-category">{{ product.category.name }}</span>
+            {% endif %}
+        </div>
+        
+        <h3 class="product-title">
+            <a href="{% url 'core:product_detail' slug=product.slug %}">{{ product.name }}</a>
+        </h3>
+        
+        <!-- Description courte -->
+        {% if product.short_description %}
+        <p class="product-short-desc">{{ product.short_description|truncatewords:15 }}</p>
+        {% endif %}
+        
+        <!-- Évaluations -->
+        <div class="product-rating">
+            <div class="stars" style="--rating: {{ product.rating|default:0 }};" 
+                 aria-label="Note: {{ product.rating|default:0 }} sur 5 étoiles">
+                <div class="stars-background">★★★★★</div>
+                <div class="stars-foreground" style="width: {% widthratio product.rating|default:0 5 100 %}%">★★★★★</div>
+            </div>
+            <span class="rating-count">({{ product.reviews_count }})</span>
+            {% if product.reviews_count == 0 %}
+            <span class="no-reviews">Pas encore d'avis</span>
+            {% endif %}
+        </div>
+        
+        <!-- Prix -->
+        <div class="product-price">
+            {% if product.is_on_sale %}
+            <span class="original-price">{{ product.original_price }} FCFA</span>
+            <span class="current-price">{{ product.price }} FCFA</span>
+            {% else %}
+            <span class="current-price single-price">{{ product.price }} FCFA</span>
+            {% endif %}
+        </div>
+        
+        <!-- Stock et disponibilité -->
+        <div class="product-availability">
+            {% if product.is_available %}
+            <div class="availability in-stock">
+                <i class="fas fa-check-circle"></i>
+                <span>En stock</span>
+            </div>
+            {% else %}
+            <div class="availability out-of-stock">
+                <i class="fas fa-times-circle"></i>
+                <span>Rupture de stock</span>
+            </div>
+            {% endif %}
+            
+            {% if product.stock_quantity %}
+            <div class="stock-info">
+                <div class="stock-bar">
+                    <div class="stock-level" style="width: {% widthratio product.stock_quantity product.max_stock|default:100 100 %}%"></div>
+                </div>
+                <span class="stock-quantity">
+                    {% if product.stock_quantity > 10 %}
+                    {{ product.stock_quantity }} disponibles
+                    {% elif product.stock_quantity > 0 %}
+                    Plus que {{ product.stock_quantity }}!
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Caractéristiques principales -->
+        {% with product.features.all|slice:":2" as main_features %}
+        {% if main_features %}
+        <div class="product-features">
+            {% for feature in main_features %}
+            <div class="feature">
+                <i class="fas {{ feature.icon|default:'fa-check' }}"></i>
+                <span>{{ feature.name }}{% if feature.value %}: {{ feature.value }}{% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        <!-- Boutons d'action -->
+        <div class="product-actions">
+            {% if product.is_available %}
+            <button class="btn-cart" data-product-id="{{ product.id }}">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Ajouter au panier</span>
+            </button>
+            {% else %}
+            <button class="btn-notify" data-product-id="{{ product.id }}">
+                <i class="fas fa-bell"></i>
+                <span>Prévenir moi</span>
+            </button>
+            {% endif %}
+            
+            <button class="btn-quick-view" data-product-id="{{ product.id }}">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+        
+        <!-- Actions secondaires -->
+        <div class="product-secondary-actions">
+            <a href="{% url 'core:product_detail' slug=product.slug %}" class="btn-details">
+                <i class="fas fa-info-circle"></i>
+                Détails
+            </a>
+            {% if user.is_authenticated %}
+            <button class="btn-compare" data-product-id="{{ product.id }}">
+                <i class="fas fa-balance-scale"></i>
+                Comparer
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        background: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #f0f0f0;
+    }
+
+    .product-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+        border-color: #0984e3;
+    }
+
+    .product-badges {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .badge {
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge.new {
+        background: linear-gradient(135deg, #00b894, #00a085);
+    }
+
+    .badge.discount {
+        background: linear-gradient(135deg, #e84393, #d63031);
+    }
+
+    .badge.featured {
+        background: linear-gradient(135deg, #0984e3, #074a8f);
+    }
+
+    .badge.out-of-stock {
+        background: linear-gradient(135deg, #636e72, #2d3436);
+    }
+
+    .badge.low-stock {
+        background: linear-gradient(135deg, #fdcb6e, #e17055);
+    }
+
+    .product-image {
+        position: relative;
+        padding-top: 75%;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+
+    .product-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.4s ease;
+        padding: 15px;
+    }
+
+    .product-image:hover img {
+        transform: scale(1.08);
+    }
+
+    .btn-wishlist {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #e0e0e0;
+        color: #b2bec3;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        font-size: 16px;
+    }
+
+    .btn-wishlist:hover {
+        color: #ff7675;
+        border-color: #ff7675;
+        transform: scale(1.1);
+    }
+
+    .btn-wishlist.active {
+        color: #ff7675;
+        border-color: #ff7675;
+        background: #fff5f5;
+    }
+
+    .product-info {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .product-meta {
+        margin-bottom: 0;
+    }
+
+    .product-category {
+        font-size: 12px;
+        color: #636e72;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        color: #2d3436;
+        line-height: 1.4;
+        flex-grow: 1;
+    }
+
+    .product-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .product-title a:hover {
+        color: #0984e3;
+    }
+
+    .product-short-desc {
+        font-size: 13px;
+        color: #636e72;
+        line-height: 1.4;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .stars {
+        position: relative;
+        display: inline-block;
+        font-size: 14px;
+        line-height: 1;
+        color: #e0e0e0;
+    }
+
+    .stars-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #e0e0e0;
+    }
+
+    .stars-foreground {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #ffe600;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .rating-count {
+        color: #636e72;
+        font-weight: 500;
+    }
+
+    .no-reviews {
+        color: #b2bec3;
+        font-style: italic;
+    }
+
+    .product-price {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #636e72;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .current-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e84393;
+    }
+
+    .current-price.single-price {
+        color: #2d3436;
+    }
+
+    .product-availability {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .availability {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .availability.in-stock {
+        color: #00b894;
+    }
+
+    .availability.out-of-stock {
+        color: #e84393;
+    }
+
+    .stock-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stock-bar {
+        height: 6px;
+        background: #dfe6e9;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .stock-level {
+        height: 100%;
+        background: linear-gradient(90deg, #00b894, #00a085);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+
+    .stock-quantity {
+        font-size: 12px;
+        color: #636e72;
+    }
+
+    .product-features {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .feature {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #636e72;
+    }
+
+    .feature i {
+        color: #0984e3;
+        width: 14px;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-cart, .btn-notify {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .btn-cart {
+        background: linear-gradient(135deg, #0984e3, #0767b3);
+        color: white;
+    }
+
+    .btn-cart:hover {
+        background: linear-gradient(135deg, #0767b3, #054a8c);
+        transform: translateY(-2px);
+    }
+
+    .btn-notify {
+        background: linear-gradient(135deg, #636e72, #4a5357);
+        color: white;
+    }
+
+    .btn-notify:hover {
+        background: linear-gradient(135deg, #4a5357, #2d3436);
+        transform: translateY(-2px);
+    }
+
+    .btn-quick-view {
+        width: 44px;
+        height: 44px;
+        border: 2px solid #e0e0e0;
+        background: white;
+        border-radius: 8px;
+        color: #636e72;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-quick-view:hover {
+        border-color: #0984e3;
+        color: #0984e3;
+        transform: translateY(-2px);
+    }
+
+    .product-secondary-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .btn-details, .btn-compare {
+        background: none;
+        border: none;
+        color: #636e72;
+        font-size: 12px;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+
+    .btn-details:hover, .btn-compare:hover {
+        color: #0984e3;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .product-card {
+            border-radius: 8px;
+        }
+        
+        .product-info {
+            padding: 15px;
+            gap: 10px;
+        }
+        
+        .product-title {
+            font-size: 14px;
+        }
+        
+        .current-price {
+            font-size: 18px;
+        }
+        
+        .btn-cart, .btn-notify {
+            padding: 10px;
+            font-size: 13px;
+        }
+        
+        .btn-quick-view {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .product-badges {
+            top: 8px;
+            left: 8px;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+        
+        .btn-wishlist {
+            width: 36px;
+            height: 36px;
+            top: 8px;
+            right: 8px;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des favoris
+    document.querySelectorAll('.btn-wishlist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            
+            if (!this.href) { // Si c'est un bouton et non un lien
+                fetch(`/api/toggle-favorite/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'added') {
+                        this.classList.add('active');
+                        this.innerHTML = '<i class="fas fa-heart"></i>';
+                        this.setAttribute('aria-label', 'Retirer des favoris');
+                        showNotification('Produit ajouté aux favoris', 'success');
+                    } else if (data.status === 'removed') {
+                        this.classList.remove('active');
+                        this.innerHTML = '<i class="far fa-heart"></i>';
+                        this.setAttribute('aria-label', 'Ajouter aux favoris');
+                        showNotification('Produit retiré des favoris', 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Erreur lors de la mise à jour des favoris', 'error');
+                });
+            }
+        });
+    });
+
+    // Gestion de l'ajout au panier
+    document.querySelectorAll('.btn-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const productCard = this.closest('.product-card');
+            
+            // Animation de feedback
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+            
+            fetch(`/api/add-to-cart/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Mettre à jour le compteur du panier
+                    updateCartCount(data.cart_items_count);
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erreur lors de l\'ajout au panier', 'error');
+            });
+        });
+    });
+
+    // Gestion de la notification de stock
+    document.querySelectorAll('.btn-notify').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            
+            const email = prompt('Entrez votre email pour être notifié quand ce produit sera de nouveau disponible:');
+            if (email) {
+                fetch(`/api/notify-stock/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email }),
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Erreur lors de l\'enregistrement', 'error');
+                });
+            }
+        });
+    });
+
+    // Gestion de la vue rapide
+    document.querySelectorAll('.btn-quick-view').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            openQuickView(productId);
+        });
+    });
+
+    // Gestion de la comparaison
+    document.querySelectorAll('.btn-compare').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            
+            fetch(`/api/toggle-compare/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    showNotification('Produit ajouté à la comparaison', 'success');
+                } else if (data.status === 'removed') {
+                    showNotification('Produit retiré de la comparaison', 'info');
+                } else if (data.status === 'limit_reached') {
+                    showNotification(data.message, 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erreur lors de la comparaison', 'error');
+            });
+        });
+    });
+
+    // Fonction utilitaire pour récupérer le cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Fonction pour afficher les notifications
+    function showNotification(message, type = 'info') {
+        // Implémentation basique de notification
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+        `;
+        
+        switch(type) {
+            case 'success':
+                notification.style.background = 'linear-gradient(135deg, #00b894, #00a085)';
+                break;
+            case 'error':
+                notification.style.background = 'linear-gradient(135deg, #e84393, #d63031)';
+                break;
+            case 'warning':
+                notification.style.background = 'linear-gradient(135deg, #fdcb6e, #e17055)';
+                break;
+            default:
+                notification.style.background = 'linear-gradient(135deg, #0984e3, #0767b3)';
+        }
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+
+    // Fonction pour mettre à jour le compteur du panier
+    function updateCartCount(count) {
+        const cartCountElements = document.querySelectorAll('.cart-count');
+        cartCountElements.forEach(element => {
+            element.textContent = count;
+        });
+    }
+
+    // Fonction pour la vue rapide (à implémenter)
+    function openQuickView(productId) {
+        // Implémentation de la modale de vue rapide
+        console.log('Ouverture de la vue rapide pour le produit:', productId);
+        // Ici vous pouvez charger les détails du produit via AJAX
+        // et afficher une modale avec les informations
+    }
+});
+</script>

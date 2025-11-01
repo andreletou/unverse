@@ -1,0 +1,506 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UniversePro - Boutique Premium High-Tech{% endblock %}</title>
+    <meta name="description" content="Boutique en ligne de produits high-tech et accessoires premium">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#1E40AF',
+                        accent: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F9FAFB',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .shadow-custom {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .toast-notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50 text-gray-800">
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mb-2 p-4 rounded-lg shadow-lg animate-fade-in {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+            <div class="flex items-center">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                <span>{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Barre de notification -->
+    <div class="bg-dark text-white py-2 text-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-1 md:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <p class="flex items-center"><i class="fas fa-truck mr-2"></i> Livraison gratuite à partir de 100 000 FCFA</p>
+                    <p class="hidden md:flex items-center"><i class="fas fa-undo mr-2"></i> Retours faciles sous 14 jours</p>
+                </div>
+                <p class="flex items-center"><i class="fas fa-phone mr-2"></i> +228 930 205 25</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white shadow-custom">
+        <div class="container mx-auto px-4">
+            <!-- Top Header -->
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-2 text-xl font-bold">
+                        <i class="fas fa-rocket text-primary text-2xl"></i>
+                        <span class="gradient-text">Universe<span class="text-secondary">Pro</span></span>
+                    </a>
+                </div>
+
+                <!-- Search Bar - Desktop -->
+                <div class="hidden md:flex flex-1 max-w-xl mx-8">
+                    <form class="w-full" action="{% url 'core:product_list' %}" method="get">
+                        <div class="relative">
+                            <input type="text" name="q" class="w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Rechercher des produits high-tech...">
+                            <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-600 hover:text-primary rounded-r-full">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    {% if user.is_authenticated %}
+                    <div class="relative group">
+                        <a href="{% url 'core:order_history' %}" class="flex flex-col items-center text-gray-600 hover:text-primary transition">
+                            <i class="fas fa-user text-lg"></i>
+                            <span class="text-xs mt-1">Mon Compte</span>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="relative group">
+                        <a href="{% url 'core:login' %}" class="flex flex-col items-center text-gray-600 hover:text-primary transition">
+                            <i class="fas fa-user text-lg"></i>
+                            <span class="text-xs mt-1">Connexion</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                    <div class="relative group">
+                        <a href="{% url 'core:order_history' %}" class="flex flex-col items-center text-gray-600 hover:text-primary transition">
+                            <i class="fas fa-box text-lg"></i>
+                            <span class="text-xs mt-1">Commandes</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="relative group">
+                        <a href="{% url 'core:favorite_list' %}" class="flex flex-col items-center text-gray-600 hover:text-primary transition">
+                            <i class="fas fa-heart text-lg"></i>
+                            <span class="text-xs mt-1">Favoris</span>
+                            {% if user.is_authenticated %}
+                            <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ request.user.favorites.count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    
+                    <div class="relative group">
+                        <a href="{% url 'core:cart_view' %}" class="flex flex-col items-center text-gray-600 hover:text-primary transition">
+                            <i class="fas fa-shopping-cart text-lg"></i>
+                            <span class="text-xs mt-1">Panier</span>
+                            <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {% if request.user.is_authenticated %}
+                                    {{ request.user.cart.items.count|default:0 }}
+                                {% else %}
+                                    {{ cart_items_count|default:0 }}
+                                {% endif %}
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center space-x-4">
+                    <a href="{% url 'core:cart_view' %}" class="relative text-gray-600">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {% if request.user.is_authenticated %}
+                                {{ request.user.cart.items.count|default:0 }}
+                            {% else %}
+                                {{ cart_items_count|default:0 }}
+                            {% endif %}
+                        </span>
+                    </a>
+                    <button id="mobile-menu-button" class="text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar - Mobile -->
+            <div class="md:hidden pb-4">
+                <form class="w-full" action="{% url 'core:product_list' %}" method="get">
+                    <div class="relative">
+                        <input type="text" name="q" class="w-full py-2 px-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Rechercher des produits...">
+                        <button type="submit" class="absolute right-0 top-0 h-full px-4 text-gray-600 hover:text-primary rounded-r-full">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Categories Menu -->
+            <div class="hidden md:block border-t border-gray-200">
+                <ul class="flex items-center justify-center space-x-8 py-3 overflow-x-auto">
+                    {% for category in main_categories %}
+                    <li class="flex-shrink-0">
+                        <a href="{% url 'core:product_list_by_category' category_slug=category.slug %}" class="flex items-center space-x-1 text-gray-600 hover:text-primary transition py-2">
+                            <i class="fas {{ category.icon }} text-sm"></i>
+                            <span>{{ category.name }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 md:hidden">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-2 text-xl font-bold">
+                        <i class="fas fa-rocket text-primary text-2xl"></i>
+                        <span class="gradient-text">Universe<span class="text-secondary">Pro</span></span>
+                    </a>
+                    <button id="close-mobile-menu" class="text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Mon Compte</h3>
+                    <ul class="space-y-2">
+                        {% if user.is_authenticated %}
+                        <li>
+                            <a href="{% url 'core:order_history' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary py-2">
+                                <i class="fas fa-user w-5"></i>
+                                <span>Mon Compte</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'core:order_history' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary py-2">
+                                <i class="fas fa-box w-5"></i>
+                                <span>Mes Commandes</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a href="{% url 'core:login' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary py-2">
+                                <i class="fas fa-user w-5"></i>
+                                <span>Connexion</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="{% url 'core:favorite_list' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary py-2">
+                                <i class="fas fa-heart w-5"></i>
+                                <span>Favoris</span>
+                                {% if user.is_authenticated %}
+                                <span class="ml-auto bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {{ request.user.favorites.count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Catégories</h3>
+                    <ul class="space-y-2">
+                        {% for category in main_categories %}
+                        <li>
+                            <a href="{% url 'core:product_list_by_category' category_slug=category.slug %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary py-2">
+                                <i class="fas {{ category.icon }} w-5"></i>
+                                <span>{{ category.name }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Company Info -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-xl font-bold mb-4">UniversePro</h3>
+                    <p class="text-gray-300 mb-4">Votre référence en matériel high-tech et appareils numériques premium.</p>
+                    <div class="space-y-2 mb-4">
+                        <p class="flex items-center text-gray-300"><i class="fas fa-phone mr-3"></i> +228 930 205 25</p>
+                        <p class="flex items-center text-gray-300"><i class="fas fa-envelope mr-3"></i> contact@universepro.com</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-gray-700 hover:bg-primary h-10 w-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="bg-gray-700 hover:bg-primary h-10 w-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="bg-gray-700 hover:bg-primary h-10 w-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="bg-gray-700 hover:bg-primary h-10 w-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">High-Tech</h3>
+                    <ul class="space-y-2">
+                        {% for category in main_categories|slice:":5" %}
+                        <li><a href="{% url 'core:product_list_by_category' category_slug=category.slug %}" class="text-gray-300 hover:text-white transition">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Assistance -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Assistance</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'core:faq' %}" class="text-gray-300 hover:text-white transition">Centre d'aide</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Guide d'achat</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Livraison & Retours</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Garanties</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="text-gray-300 hover:text-white transition">Contactez-nous</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Entreprise</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'core:about' %}" class="text-gray-300 hover:text-white transition">À propos</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Showroom</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Carrières</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Blog Tech</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition">Programme Fidélité</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">&copy; 2025 UniversePro. Tous droits réservés. | <i class="fas fa-phone mx-1"></i> +228 930 205 25 | <i class="fas fa-envelope mx-1"></i> contact@universepro.com</p>
+                <div class="flex space-x-4 text-2xl">
+                    <i class="fab fa-cc-visa text-gray-400"></i>
+                    <i class="fab fa-cc-mastercard text-gray-400"></i>
+                    <i class="fab fa-cc-paypal text-gray-400"></i>
+                    <i class="fab fa-cc-apple-pay text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    {% block extra_js %}{% endblock %}
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+            });
+            
+            closeMobileMenu.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+            });
+        }
+
+        // Fonctions communes
+        function updateCartCount(count) {
+            document.querySelectorAll('.cart-count').forEach(el => {
+                el.textContent = count;
+            });
+        }
+
+        function updateFavoriteCount(count) {
+            document.querySelectorAll('.favorites-count').forEach(el => {
+                el.textContent = count;
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification bg-white rounded-lg shadow-lg p-4 flex items-center space-x-3 border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
+            toast.innerHTML = `
+                <div class="toast-icon ${type === 'success' ? 'text-green-500' : 'text-red-500'}">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-xl"></i>
+                </div>
+                <div class="toast-message text-gray-800">${message}</div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Gestion des favoris
+        document.querySelectorAll('.btn-wishlist').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                fetch(`{% url 'core:toggle_favorite' 0 %}`.replace('0', productId), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'added') {
+                        this.classList.add('active');
+                        showToast('Produit ajouté aux favoris');
+                        updateFavoriteCount(data.favorites_count);
+                    } else if(data.status === 'removed') {
+                        this.classList.remove('active');
+                        showToast('Produit retiré des favoris');
+                        updateFavoriteCount(data.favorites_count);
+                    }
+                });
+            });
+        });
+
+        // Gestion du panier
+        document.querySelectorAll('.btn-cart').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                fetch(`{% url 'core:add_to_cart' 0 %}`.replace('0', productId), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        quantity: 1
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        showToast(data.message);
+                        updateCartCount(data.cart_items_count);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1026 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout - UniversePro{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <div class="checkout-header">
+            <h1>Finaliser votre commande</h1>
+            <div class="checkout-steps">
+                <div class="step active">1. Panier</div>
+                <div class="step active">2. Livraison & Paiement</div>
+                <div class="step">3. Confirmation</div>
+            </div>
+        </div>
+
+        <div class="checkout-grid">
+            <div class="checkout-form-container">
+                <form id="checkout-form" method="post" action="{% url 'core:checkout' %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <h2><i class="fas fa-truck"></i> Adresse de livraison</h2>
+                        {% if addresses %}
+                            <div class="address-options">
+                                {% for address in addresses %}
+                                <div class="address-option">
+                                    <input type="radio" name="shipping_address" id="shipping_address_{{ address.id }}" 
+                                           value="{{ address.id }}" {% if forloop.first %}checked{% endif %}>
+                                    <label for="shipping_address_{{ address.id }}">
+                                        <strong>{{ address.full_name }}</strong><br>
+                                        {{ address.address_line1 }}<br>
+                                        {% if address.address_line2 %}{{ address.address_line2 }}<br>{% endif %}
+                                        {{ address.city }}, {{ address.postal_code }}<br>
+                                        {{ address.country }}<br>
+                                        Tél: {{ address.phone }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                <div class="address-option new-address">
+                                    <input type="radio" name="shipping_address" id="shipping_address_new" value="new">
+                                    <label for="shipping_address_new">
+                                        <i class="fas fa-plus"></i> Nouvelle adresse
+                                    </label>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div id="new-shipping-address" {% if addresses %}style="display:none;"{% endif %}>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_shipping_full_name">Nom complet*</label>
+                                    {{ form.shipping_full_name }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_shipping_phone">Téléphone*</label>
+                                    {{ form.shipping_phone }}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_shipping_address_line1">Adresse*</label>
+                                {{ form.shipping_address_line1 }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_shipping_address_line2">Complément d'adresse</label>
+                                {{ form.shipping_address_line2 }}
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="id_shipping_city">Ville*</label>
+                                    {{ form.shipping_city }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_shipping_postal_code">Code postal*</label>
+                                    {{ form.shipping_postal_code }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_shipping_country">Pays*</label>
+                                    {{ form.shipping_country }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2><i class="fas fa-credit-card"></i> Mode de paiement</h2>
+                        <div class="payment-methods">
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="payment_method_mobile" 
+                                       value="mobile_money" checked>
+                                <label for="payment_method_mobile">
+                                    <i class="fas fa-mobile-alt"></i> Mobile Money (Togocom, Moov, etc.)
+                                </label>
+                                
+                                <div id="mobile-money-details" style="margin-top: 15px; padding-left: 25px;">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="id_mobile_money_phone">Numéro Mobile Money*</label>
+                                            <input type="tel" name="mobile_money_phone" id="id_mobile_money_phone" 
+                                                   required pattern="[0-9]{8,15}" 
+                                                   title="Entrez un numéro de téléphone valide">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_mobile_money_network">Réseau*</label>
+                                            <select name="mobile_money_network" id="id_mobile_money_network" required>
+                                                <option value="">Sélectionnez votre réseau</option>
+                                                <option value="FLOOZ">FLOOZ (Togocom)</option>
+                                                <option value="TMONEY">TMoney (Moov)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="payment-info">
+                                        <p><i class="fas fa-info-circle"></i> Vous recevrez une demande de paiement sur votre mobile</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="payment_method_mobile" 
+                                    value="mobile_money" checked>
+                                <label for="payment_method_mobile">
+                                    <i class="fas fa-mobile-alt"></i> Mobile Money (Togocom, Moov, etc.)
+                                </label>
+                                
+                                <div id="mobile-money-details" style="margin-top: 15px; padding-left: 25px;">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="id_mobile_money_phone">Numéro Mobile Money*</label>
+                                            <input type="tel" name="mobile_money_phone" id="id_mobile_money_phone" 
+                                                class="payment-field" data-payment-method="mobile_money"
+                                                pattern="[0-9]{8,15}" 
+                                                title="Entrez un numéro de téléphone valide">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_mobile_money_network">Réseau*</label>
+                                            <select name="mobile_money_network" id="id_mobile_money_network" 
+                                                    class="payment-field" data-payment-method="mobile_money">
+                                                <option value="">Sélectionnez votre réseau</option>
+                                                <option value="FLOOZ">FLOOZ (Togocom)</option>
+                                                <option value="TMONEY">TMoney (Moov)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="payment-info">
+                                        <p><i class="fas fa-info-circle"></i> Vous recevrez une demande de paiement sur votre mobile</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="payment_method_card" 
+                                    value="credit_card">
+                                <label for="payment_method_card">
+                                    <i class="fas fa-credit-card"></i> Carte bancaire
+                                </label>
+                                <div id="card-details" style="display:none; margin-top: 15px; padding-left: 25px;">
+                                    <div class="form-group">
+                                        <label for="id_card_number">Numéro de carte*</label>
+                                        <input type="text" name="card_number" id="id_card_number" 
+                                            class="payment-field" data-payment-method="credit_card"
+                                            placeholder="1234 5678 9012 3456">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="id_card_expiry">Date d'expiration*</label>
+                                            <input type="text" name="card_expiry" id="id_card_expiry" 
+                                                class="payment-field" data-payment-method="credit_card"
+                                                placeholder="MM/AA">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="id_card_cvv">CVV*</label>
+                                            <input type="text" name="card_cvv" id="id_card_cvv" 
+                                                class="payment-field" data-payment-method="credit_card"
+                                                placeholder="123">
+                                        </div>
+                                    </div>
+                                    <div class="payment-info">
+                                        <p><i class="fas fa-lock"></i> Paiement sécurisé avec cryptage SSL</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="payment_method_cash" 
+                                       value="cash_on_delivery">
+                                <label for="payment_method_cash">
+                                    <i class="fas fa-money-bill-wave"></i> Paiement à la livraison
+                                </label>
+                                <div id="cash-details" style="display:none; margin-top: 15px; padding-left: 25px;">
+                                    <div class="payment-info">
+                                        <p><i class="fas fa-info-circle"></i> Vous payez en espèces lors de la livraison</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2><i class="fas fa-shipping-fast"></i> Méthode de livraison</h2>
+                        <div class="shipping-methods">
+                            {% for method in shipping_methods %}
+                            <div class="shipping-option">
+                                <input type="radio" name="shipping_method" id="shipping_method_{{ method.id }}" 
+                                       value="{{ method.id }}" {% if forloop.first %}checked{% endif %}>
+                                <label for="shipping_method_{{ method.id }}">
+                                    <span class="shipping-name">{{ method.name }}</span>
+                                    <span class="shipping-price">{{ method.price }} FCFA</span>
+                                    <span class="shipping-desc">{{ method.description }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2><i class="fas fa-comment-alt"></i> Instructions spéciales</h2>
+                        <div class="form-group">
+                            {{ form.note }}
+                            <small>Des instructions spéciales pour la livraison ?</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'core:cart_view' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour au panier
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submit-order">
+                            Passer la commande <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="order-summary">
+                <h2><i class="fas fa-receipt"></i> Récapitulatif</h2>
+                <div class="summary-items">
+                    {% for item in cart.items.all %}
+                    <div class="summary-item">
+                        <div class="item-image">
+                            {% if item.product.images.first %}
+                            <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="item-details">
+                            <h4>{{ item.product.name }}</h4>
+                            <p>{{ item.quantity }} × {{ item.price }} FCFA</p>
+                        </div>
+                        <div class="item-total">
+                            {{ item.total_price }} FCFA
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-totals">
+                    <div class="total-row">
+                        <span>Sous-total</span>
+                        <span>{{ cart.subtotal }} FCFA</span>
+                    </div>
+                    {% if cart.coupon %}
+                    <div class="total-row discount">
+                        <span>Réduction ({{ cart.coupon.code }})</span>
+                        <span>-{{ cart.coupon_discount }} FCFA</span>
+                    </div>
+                    {% endif %}
+                    <div class="total-row">
+                        <span>Livraison</span>
+                        <span>{{ cart.shipping_cost }} FCFA</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Total</span>
+                        <span>{{ cart.total }} FCFA</span>
+                    </div>
+                </div>
+
+                {% if not cart.coupon %}
+                <div class="coupon-form">
+                    <form id="apply-coupon" method="post" action="{% url 'core:apply_coupon' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="coupon_code" placeholder="Code promo">
+                            <button type="submit" class="btn btn-small">Appliquer</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <div class="security-info">
+                    <p><i class="fas fa-lock"></i> Paiement sécurisé SSL</p>
+                    <div class="payment-icons">
+                        <i class="fab fa-cc-visa"></i>
+                        <i class="fab fa-cc-mastercard"></i>
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Styles existants conservés */
+    .checkout-section {
+        padding: 40px 0;
+        background-color: #f9f9f9;
+    }
+    
+    .checkout-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .checkout-header h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .step {
+        padding: 10px 20px;
+        margin: 0 10px;
+        background-color: #eee;
+        color: #777;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .step.active {
+        background-color: #333;
+        color: white;
+    }
+    
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+    }
+    
+    .form-section {
+        background: white;
+        padding: 25px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .form-section h2 {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section h2 i {
+        margin-right: 10px;
+        color: #666;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+    }
+    
+    .address-options {
+        margin-bottom: 20px;
+    }
+    
+    .address-option {
+        margin-bottom: 10px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .address-option input[type="radio"] {
+        margin-right: 10px;
+    }
+    
+    .address-option label {
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+    
+    .new-address {
+        background-color: #f5f5f5;
+    }
+    
+    .payment-methods,
+    .shipping-methods {
+        margin-bottom: 15px;
+    }
+    
+    .payment-option,
+    .shipping-option {
+        margin-bottom: 10px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .payment-option input[type="radio"],
+    .shipping-option input[type="radio"] {
+        margin-right: 10px;
+    }
+    
+    .payment-option label,
+    .shipping-option label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .shipping-option label {
+        display: block;
+    }
+    
+    .shipping-name {
+        font-weight: 500;
+        margin-right: 10px;
+    }
+    
+    .shipping-price {
+        float: right;
+        font-weight: bold;
+    }
+    
+    .shipping-desc {
+        display: block;
+        margin-top: 5px;
+        font-size: 13px;
+        color: #666;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        padding: 12px 25px;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .btn-secondary {
+        background-color: #eee;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+    
+    .btn-primary {
+        background-color: #333;
+        color: white;
+        border: none;
+    }
+    
+    .btn-small {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+    
+    .order-summary {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+        align-self: start;
+    }
+    
+    .order-summary h2 {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+    
+    .order-summary h2 i {
+        margin-right: 10px;
+        color: #666;
+    }
+    
+    .summary-items {
+        margin-bottom: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .summary-item {
+        display: grid;
+        grid-template-columns: 60px 1fr auto;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .item-image img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    
+    .item-details h4 {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    .item-details p {
+        font-size: 13px;
+        color: #666;
+    }
+    
+    .item-total {
+        font-weight: 500;
+    }
+    
+    .summary-totals {
+        margin: 25px 0;
+        padding: 15px 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .total-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .grand-total {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 15px;
+    }
+    
+    .coupon-form {
+        margin-bottom: 20px;
+    }
+    
+    .coupon-form .form-group {
+        display: flex;
+    }
+    
+    .coupon-form input {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+    
+    .security-info {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .security-info p {
+        margin-bottom: 10px;
+        color: #666;
+    }
+    
+    .payment-icons {
+        font-size: 24px;
+    }
+    
+    .payment-icons i {
+        margin: 0 5px;
+    }
+    
+    /* Nouveaux styles */
+    .payment-info {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    
+    .payment-info i {
+        margin-right: 5px;
+        color: #6c757d;
+    }
+    
+    #mobile-money-details,
+    #card-details,
+    #cash-details {
+        transition: all 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    // Toggle new address form
+    document.querySelectorAll('input[name="shipping_address"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const newAddressForm = document.getElementById('new-shipping-address');
+            if (this.value === 'new') {
+                newAddressForm.style.display = 'block';
+            } else {
+                newAddressForm.style.display = 'none';
+            }
+        });
+    });
+
+    // Toggle payment method details
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const mobileMoneyDetails = document.getElementById('mobile-money-details');
+            const cardDetails = document.getElementById('card-details');
+            const cashDetails = document.getElementById('cash-details');
+            
+            mobileMoneyDetails.style.display = 'none';
+            cardDetails.style.display = 'none';
+            cashDetails.style.display = 'none';
+            
+            if (this.value === 'mobile_money') {
+                mobileMoneyDetails.style.display = 'block';
+            } else if (this.value === 'credit_card') {
+                cardDetails.style.display = 'block';
+            } else if (this.value === 'cash_on_delivery') {
+                cashDetails.style.display = 'block';
+            }
+        });
+    });
+
+    // Coupon form submission
+    document.getElementById('apply-coupon')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast(data.message);
+                // Reload to update cart totals
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message, 'error');
+            }
+        });
+    });
+
+    // Gestion de la soumission du formulaire principal
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-order');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+        
+        try {
+            // Validation des champs requis
+            if (!validateForm()) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                return;
+            }
+            
+            // Collecter toutes les données du formulaire
+            const formData = new FormData(this);
+            const checkoutData = {};
+            
+            // Convertir FormData en objet
+            for (let [key, value] of formData.entries()) {
+                // Ne pas inclure les champs de paiement non pertinents
+                if (key.includes('payment_field') || value === '') {
+                    continue;
+                }
+                checkoutData[key] = value;
+            }
+            
+            // Nettoyer les données de paiement selon la méthode sélectionnée
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            checkoutData.payment_method = paymentMethod;
+            
+            if (paymentMethod !== 'mobile_money') {
+                delete checkoutData.mobile_money_phone;
+                delete checkoutData.mobile_money_network;
+            }
+            if (paymentMethod !== 'credit_card') {
+                delete checkoutData.card_number;
+                delete checkoutData.card_expiry;
+                delete checkoutData.card_cvv;
+            }
+            
+            // Formater les numéros de téléphone
+            if (checkoutData.shipping_phone) {
+                checkoutData.shipping_phone = formatPhoneNumber(checkoutData.shipping_phone);
+            }
+            if (checkoutData.mobile_money_phone) {
+                checkoutData.mobile_money_phone = formatPhoneNumber(checkoutData.mobile_money_phone);
+            }
+            
+            console.log('Données envoyées:', checkoutData);
+            
+            const response = await fetch('{% url "core:finalize_order" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(checkoutData)
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Erreur serveur');
+            }
+            
+            if (result.status === 'success') {
+                showToast('🎉 Commande créée avec succès! Redirection...', 'success');
+                
+                // Rediriger vers la page de confirmation
+                setTimeout(() => {
+                    if (result.redirect_url) {
+                        window.location.href = result.redirect_url;
+                    } else {
+                        window.location.href = '{% url "core:order_history" %}';
+                    }
+                }, 2000);
+                
+            } else {
+                throw new Error(result.message || 'Erreur inconnue');
+            }
+            
+        } catch (error) {
+            console.error('Erreur:', error);
+            showToast('❌ ' + error.message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    // Mettre à jour la fonction de validation pour gérer les champs de paiement
+    function validateForm() {
+        const form = document.getElementById('checkout-form');
+        let isValid = true;
+        
+        // Réinitialiser les styles d'erreur
+        document.querySelectorAll('.error-field').forEach(field => {
+            field.classList.remove('error-field');
+        });
+        document.querySelectorAll('.error-message').forEach(msg => {
+            msg.remove();
+        });
+        
+        // Valider l'adresse de livraison
+        const shippingAddress = form.querySelector('input[name="shipping_address"]:checked');
+        if (!shippingAddress) {
+            showFieldError('shipping_address', 'Veuillez sélectionner une adresse de livraison');
+            isValid = false;
+        }
+        
+        // Si nouvelle adresse, valider les champs
+        if (shippingAddress && shippingAddress.value === 'new') {
+            const requiredFields = [
+                'shipping_full_name',
+                'shipping_phone',
+                'shipping_address_line1',
+                'shipping_city',
+                'shipping_postal_code',
+                'shipping_country'
+            ];
+            
+            requiredFields.forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (field && !field.value.trim()) {
+                    showFieldError(fieldName, 'Ce champ est obligatoire');
+                    isValid = false;
+                }
+            });
+        }
+        
+        // Valider le mode de paiement
+        const paymentMethod = form.querySelector('input[name="payment_method"]:checked');
+        if (!paymentMethod) {
+            showFieldError('payment_method', 'Veuillez sélectionner un mode de paiement');
+            isValid = false;
+            return isValid;
+        }
+        
+        // Valider les détails du paiement selon la méthode
+        const paymentValue = paymentMethod.value;
+        
+        if (paymentValue === 'mobile_money') {
+            const mobilePhone = form.querySelector('[name="mobile_money_phone"]');
+            const mobileNetwork = form.querySelector('[name="mobile_money_network"]');
+            
+            if (!mobilePhone || !mobilePhone.value.trim()) {
+                showFieldError('mobile_money_phone', 'Le numéro Mobile Money est obligatoire');
+                isValid = false;
+            } else if (mobilePhone.value.trim().length < 8) {
+                showFieldError('mobile_money_phone', 'Le numéro doit contenir au moins 8 chiffres');
+                isValid = false;
+            }
+            
+            if (!mobileNetwork || !mobileNetwork.value) {
+                showFieldError('mobile_money_network', 'Veuillez sélectionner votre réseau');
+                isValid = false;
+            }
+        } else if (paymentValue === 'credit_card') {
+            const cardNumber = form.querySelector('[name="card_number"]');
+            const cardExpiry = form.querySelector('[name="card_expiry"]');
+            const cardCvv = form.querySelector('[name="card_cvv"]');
+            
+            if (!cardNumber || !cardNumber.value.trim()) {
+                showFieldError('card_number', 'Le numéro de carte est obligatoire');
+                isValid = false;
+            }
+            if (!cardExpiry || !cardExpiry.value.trim()) {
+                showFieldError('card_expiry', 'La date d\'expiration est obligatoire');
+                isValid = false;
+            }
+            if (!cardCvv || !cardCvv.value.trim()) {
+                showFieldError('card_cvv', 'Le CVV est obligatoire');
+                isValid = false;
+            }
+        }
+        // Pas de validation spécifique pour cash_on_delivery
+        
+        // Valider la méthode de livraison
+        const shippingMethod = form.querySelector('input[name="shipping_method"]:checked');
+        if (!shippingMethod) {
+            showFieldError('shipping_method', 'Veuillez sélectionner une méthode de livraison');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    // Format card number
+    document.getElementById('id_card_number')?.addEventListener('input', function(e) {
+        let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let formatted = '';
+        
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formatted += ' ';
+            }
+            formatted += value[i];
+        }
+        
+        this.value = formatted;
+    });
+
+    // Format expiry date
+    document.getElementById('id_card_expiry')?.addEventListener('input', function(e) {
+        let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let formatted = '';
+        
+        for (let i = 0; i < value.length; i++) {
+            if (i === 2) {
+                formatted += '/';
+            }
+            if (i >= 4) break;
+            formatted += value[i];
+        }
+        
+        this.value = formatted;
+    });
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+</script>
+<script>
+// Gestion de la soumission du formulaire
+document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submit-order');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création de la commande...';
+    
+    try {
+        // Collecter toutes les données du formulaire
+        const formData = new FormData(this);
+        const checkoutData = {};
+        
+        // Convertir FormData en objet
+        for (let [key, value] of formData.entries()) {
+            checkoutData[key] = value;
+        }
+        
+        // Ajouter les données supplémentaires
+        checkoutData.shipping_cost = '{{ cart.shipping_cost }}';
+        checkoutData.subtotal = '{{ cart.subtotal }}';
+        checkoutData.total = '{{ cart.total }}';
+        
+        const response = await fetch('{% url "core:finalize_order" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(checkoutData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showToast('Commande créée avec succès!', 'success');
+            
+            // Rediriger vers la page de confirmation
+            setTimeout(() => {
+                window.location.href = result.redirect_url;
+            }, 2000);
+            
+        } else {
+            showToast(result.message, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Passer la commande <i class="fas fa-arrow-right"></i>';
+        }
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        showToast('Une erreur est survenue', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Passer la commande <i class="fas fa-arrow-right"></i>';
+    }
+});
+
+// Fonction pour formater les numéros de téléphone
+function formatPhoneNumber(phone) {
+    // Supprimer tous les caractères non numériques
+    phone = phone.replace(/\D/g, '');
+    
+    // Ajouter l'indicatif Togo si absent
+    if (phone.startsWith('9') && phone.length === 8) {
+        phone = '228' + phone;
+    } else if (phone.startsWith('0')) {
+        phone = '228' + phone.substring(1);
+    }
+    
+    return phone;
+}
+
+// Validation des champs
+document.getElementById('id_shipping_phone')?.addEventListener('blur', function() {
+    this.value = formatPhoneNumber(this.value);
+});
+
+document.getElementById('id_mobile_money_phone')?.addEventListener('blur', function() {
+    this.value = formatPhoneNumber(this.value);
+});
+</script>
+{% endblock %}

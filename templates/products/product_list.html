@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nos Produits{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Product Filter/Sort Bar -->
+    <div class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-4">
+                <!-- Mobile Filter Toggle -->
+                <div class="flex items-center justify-between mb-4 lg:hidden">
+                    <button id="filterToggle" class="flex items-center space-x-2 bg-amazon-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Filtres</span>
+                    </button>
+                    
+                    <div class="flex items-center space-x-2">
+                        <label for="sortSelect" class="text-sm text-gray-600">Trier:</label>
+                        <select id="sortSelect" class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-amazon-orange focus:border-amazon-orange">
+                            <option value="" {% if not sort_by %}selected{% endif %}>Par défaut</option>
+                            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Nouveautés</option>
+                            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Prix croissant</option>
+                            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Prix décroissant</option>
+                            <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Meilleures notes</option>
+                            <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Plus populaires</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Desktop Filter Bar -->
+                <div class="hidden lg:flex lg:items-center lg:justify-between">
+                    <div class="flex items-center space-x-6">
+                        <span class="text-sm font-medium text-gray-700">Filtres:</span>
+                        
+                        <!-- Sort Options -->
+                        <div class="flex items-center space-x-2">
+                            <label for="sortSelectDesktop" class="text-sm text-gray-600">Trier par:</label>
+                            <select id="sortSelectDesktop" class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-amazon-orange focus:border-amazon-orange">
+                                <option value="" {% if not sort_by %}selected{% endif %}>Par défaut</option>
+                                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Nouveautés</option>
+                                <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Prix croissant</option>
+                                <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Prix décroissant</option>
+                                <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Meilleures notes</option>
+                                <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Plus populaires</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Results Count -->
+                    <div class="text-sm text-gray-500">
+                        {{ products.paginator.count }} produit{{ products.paginator.count|pluralize }} trouvé{{ products.paginator.count|pluralize }}
+                    </div>
+                </div>
+
+                <!-- Active Filters -->
+                {% if search_query or current_category %}
+                <div class="mt-3 flex flex-wrap gap-2">
+                    {% if search_query %}
+                    <span class="inline-flex items-center bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+                        Recherche: "{{ search_query }}"
+                        <button class="ml-2 text-blue-600 hover:text-blue-800 remove-filter" data-filter="q">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </span>
+                    {% endif %}
+                    {% if current_category %}
+                    <span class="inline-flex items-center bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+                        Catégorie: {{ current_category }}
+                        <button class="ml-2 text-green-600 hover:text-green-800 remove-filter" data-filter="category">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Sidebar Filters -->
+            <aside id="sidebarFilters" class="lg:w-64 flex-shrink-0">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
+                    <!-- Desktop Sidebar -->
+                    <div class="hidden lg:block p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">Filtres</h3>
+                            <button id="resetFilters" class="text-sm text-amazon-blue hover:text-amazon-orange transition-colors">
+                                Réinitialiser
+                            </button>
+                        </div>
+
+                        <!-- Price Range Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Prix (FCFA)</h4>
+                            <div class="space-y-3">
+                                <div id="priceSlider" class="range-slider"></div>
+                                <div class="flex items-center space-x-3">
+                                    <input type="number" id="minPrice" placeholder="Min" 
+                                           class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-amazon-orange focus:border-amazon-orange">
+                                    <span class="text-gray-500">-</span>
+                                    <input type="number" id="maxPrice" placeholder="Max" 
+                                           class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-amazon-orange focus:border-amazon-orange">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Categories Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Catégories</h4>
+                            <ul class="space-y-2">
+                                {% for category in categories %}
+                                <li>
+                                    <a href="{% url 'core:product_list_by_category' category.slug %}" 
+                                       class="flex items-center text-sm text-gray-600 hover:text-amazon-blue transition-colors {% if current_category == category.slug %}text-amazon-blue font-medium{% endif %}">
+                                        <i class="fas {{ category.icon|default:'fa-mobile-alt' }} w-4 mr-2"></i>
+                                        {{ category.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Notes</h4>
+                            <div class="space-y-2">
+                                {% for i in "54321" %}
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="rating{{i}}" name="rating" value="{{i}}"
+                                           class="w-4 h-4 text-amazon-orange border-gray-300 rounded focus:ring-amazon-orange"
+                                           {% if i in request.GET.rating %}checked{% endif %}>
+                                    <label for="rating{{i}}" class="ml-2 text-sm text-gray-700 flex items-center">
+                                        {% for star in "12345" %}
+                                            {% if forloop.counter <= i|add:"0" %}
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-yellow-400 text-xs"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ml-1">& plus</span>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Availability Filter -->
+                        <div class="mb-6">
+                            <h4 class="font-medium text-gray-900 mb-3">Disponibilité</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="inStock" name="availability" value="in_stock"
+                                           class="w-4 h-4 text-amazon-orange border-gray-300 rounded focus:ring-amazon-orange"
+                                           {% if 'in_stock' in request.GET.availability %}checked{% endif %}>
+                                    <label for="inStock" class="ml-2 text-sm text-gray-700">En stock</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="onSale" name="availability" value="on_sale"
+                                           class="w-4 h-4 text-amazon-orange border-gray-300 rounded focus:ring-amazon-orange"
+                                           {% if 'on_sale' in request.GET.availability %}checked{% endif %}>
+                                    <label for="onSale" class="ml-2 text-sm text-gray-700">En promotion</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="applyFilters" class="w-full bg-amazon-orange text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors font-medium">
+                            Appliquer les filtres
+                        </button>
+                    </div>
+
+                    <!-- Mobile Sidebar Overlay -->
+                    <div id="mobileSidebar" class="lg:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out -translate-x-full">
+                        <div class="fixed inset-0 bg-black bg-opacity-50" id="sidebarBackdrop"></div>
+                        <div class="relative bg-white w-80 h-full overflow-y-auto">
+                            <div class="p-4 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900">Filtres</h3>
+                                    <button id="closeSidebar" class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <!-- Mobile filter content same as desktop -->
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">Prix (FCFA)</h4>
+                                    <div class="space-y-3">
+                                        <div id="priceSliderMobile" class="range-slider"></div>
+                                        <div class="flex items-center space-x-3">
+                                            <input type="number" id="minPriceMobile" placeholder="Min" 
+                                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                            <span class="text-gray-500">-</span>
+                                            <input type="number" id="maxPriceMobile" placeholder="Max" 
+                                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Other filters repeated for mobile -->
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">Catégories</h4>
+                                    <ul class="space-y-2">
+                                        {% for category in categories %}
+                                        <li>
+                                            <a href="{% url 'core:product_list_by_category' category.slug %}" 
+                                               class="flex items-center text-sm text-gray-600 hover:text-amazon-blue transition-colors {% if current_category == category.slug %}text-amazon-blue font-medium{% endif %}">
+                                                <i class="fas {{ category.icon|default:'fa-mobile-alt' }} w-4 mr-2"></i>
+                                                {{ category.name }}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">Notes</h4>
+                                    <div class="space-y-2">
+                                        {% for i in "54321" %}
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="rating{{i}}Mobile" name="rating" value="{{i}}"
+                                                   class="w-4 h-4 text-amazon-orange border-gray-300 rounded">
+                                            <label for="rating{{i}}Mobile" class="ml-2 text-sm text-gray-700 flex items-center">
+                                                {% for star in "12345" %}
+                                                    {% if forloop.counter <= i|add:"0" %}
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    {% else %}
+                                                    <i class="far fa-star text-yellow-400 text-xs"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="ml-1">& plus</span>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">Disponibilité</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="inStockMobile" name="availability" value="in_stock"
+                                                   class="w-4 h-4 text-amazon-orange border-gray-300 rounded">
+                                            <label for="inStockMobile" class="ml-2 text-sm text-gray-700">En stock</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="onSaleMobile" name="availability" value="on_sale"
+                                                   class="w-4 h-4 text-amazon-orange border-gray-300 rounded">
+                                            <label for="onSaleMobile" class="ml-2 text-sm text-gray-700">En promotion</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex space-x-3">
+                                    <button id="applyFiltersMobile" class="flex-1 bg-amazon-orange text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors font-medium">
+                                        Appliquer
+                                    </button>
+                                    <button id="resetFiltersMobile" class="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors font-medium">
+                                        Réinitialiser
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product Grid -->
+            <div class="flex-1">
+                {% if products %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                    {% for product in products %}
+                    {% include 'products/product_card.html' with product=product %}
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                <div class="flex items-center justify-center space-x-2">
+                    {% if products.has_previous %}
+                    <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-double-left mr-1"></i>
+                        Première
+                    </a>
+                    <a href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-angle-left mr-1"></i>
+                        Précédent
+                    </a>
+                    {% endif %}
+
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <span class="inline-flex items-center px-4 py-2 border border-amazon-orange text-sm font-medium text-amazon-orange bg-orange-50 rounded-md">
+                            {{ num }}
+                        </span>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-md transition-colors">
+                            {{ num }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                    <a href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 transition-colors">
+                        Suivant
+                        <i class="fas fa-angle-right ml-1"></i>
+                    </a>
+                    <a href="?page={{ products.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 transition-colors">
+                        Dernière
+                        <i class="fas fa-angle-double-right ml-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- No Results -->
+                <div class="text-center py-12">
+                    <div class="max-w-md mx-auto">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-search text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
+                        <p class="text-gray-600 mb-6">Essayez d'ajuster vos filtres ou votre recherche</p>
+                        <a href="{% url 'core:product_list' %}" class="inline-flex items-center px-6 py-3 bg-amazon-orange text-white font-medium rounded-md hover:bg-orange-600 transition-colors">
+                            Réinitialiser les filtres
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<div id="quickViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+        
+        <div class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+            <button type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <div class="modal-body p-6" id="quickViewContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/vendor/nouislider.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile sidebar functionality
+    const filterToggle = document.getElementById('filterToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    if (filterToggle) {
+        filterToggle.addEventListener('click', () => {
+            mobileSidebar.classList.remove('-translate-x-full');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    if (closeSidebar) {
+        closeSidebar.addEventListener('click', () => {
+            mobileSidebar.classList.add('-translate-x-full');
+            document.body.style.overflow = '';
+        });
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', () => {
+            mobileSidebar.classList.add('-translate-x-full');
+            document.body.style.overflow = '';
+        });
+    }
+
+    // Price slider initialization
+    function initializePriceSlider(sliderId, minInputId, maxInputId) {
+        const slider = document.getElementById(sliderId);
+        const minInput = document.getElementById(minInputId);
+        const maxInput = document.getElementById(maxInputId);
+
+        if (slider) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const minPrice = urlParams.get('min_price') ? parseInt(urlParams.get('min_price')) : 0;
+            const maxPrice = urlParams.get('max_price') ? parseInt(urlParams.get('max_price')) : 100000;
+
+            noUiSlider.create(slider, {
+                start: [minPrice, maxPrice],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 100000
+                },
+                step: 1000,
+                format: {
+                    to: function(value) {
+                        return Math.round(value);
+                    },
+                    from: function(value) {
+                        return Number(value);
+                    }
+                }
+            });
+
+            // Set initial values
+            minInput.value = minPrice;
+            maxInput.value = maxPrice;
+
+            slider.noUiSlider.on('update', function(values) {
+                minInput.value = values[0];
+                maxInput.value = values[1];
+            });
+
+            minInput.addEventListener('change', function() {
+                slider.noUiSlider.set([this.value, null]);
+            });
+
+            maxInput.addEventListener('change', function() {
+                slider.noUiSlider.set([null, this.value]);
+            });
+        }
+    }
+
+    // Initialize sliders for desktop and mobile
+    initializePriceSlider('priceSlider', 'minPrice', 'maxPrice');
+    initializePriceSlider('priceSliderMobile', 'minPriceMobile', 'maxPriceMobile');
+
+    // Sort functionality
+    const sortSelects = ['sortSelect', 'sortSelectDesktop'];
+    sortSelects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.addEventListener('change', function() {
+                updateUrlParameter('sort_by', this.value);
+            });
+        }
+    });
+
+    // Filter application
+    function applyFilters(isMobile = false) {
+        const prefix = isMobile ? 'Mobile' : '';
+        const filters = {
+            min_price: document.getElementById(`minPrice${prefix}`)?.value,
+            max_price: document.getElementById(`maxPrice${prefix}`)?.value,
+            rating: Array.from(document.querySelectorAll(`input[name="rating"]${prefix ? '[id$="Mobile"]' : ':not([id$="Mobile"])'}:checked`))
+                        .map(input => input.value),
+            availability: Array.from(document.querySelectorAll(`input[name="availability"]${prefix ? '[id$="Mobile"]' : ':not([id$="Mobile"])'}:checked`))
+                            .map(input => input.value)
+        };
+
+        const url = new URL(window.location.href);
+        
+        // Remove existing filter params
+        ['min_price', 'max_price', 'rating', 'availability', 'page'].forEach(param => {
+            url.searchParams.delete(param);
+        });
+        
+        // Add new filter params
+        if (filters.min_price) url.searchParams.set('min_price', filters.min_price);
+        if (filters.max_price) url.searchParams.set('max_price', filters.max_price);
+        if (filters.rating.length) url.searchParams.set('rating', filters.rating.join(','));
+        if (filters.availability.length) url.searchParams.set('availability', filters.availability.join(','));
+
+        window.location.href = url.toString();
+    }
+
+    // Event listeners for filter buttons
+    document.getElementById('applyFilters')?.addEventListener('click', () => applyFilters(false));
+    document.getElementById('applyFiltersMobile')?.addEventListener('click', () => applyFilters(true));
+
+    // Reset filters
+    function resetFilters() {
+        window.location.href = window.location.pathname;
+    }
+
+    document.getElementById('resetFilters')?.addEventListener('click', resetFilters);
+    document.getElementById('resetFiltersMobile')?.addEventListener('click', resetFilters);
+
+    // Remove individual filters
+    document.querySelectorAll('.remove-filter').forEach(button => {
+        button.addEventListener('click', function() {
+            const param = this.getAttribute('data-filter');
+            const url = new URL(window.location.href);
+            url.searchParams.delete(param);
+            window.location.href = url.toString();
+        });
+    });
+
+    // Helper function to update URL parameters
+    function updateUrlParameter(key, value) {
+        const url = new URL(window.location.href);
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+        if (key !== 'page') {
+            url.searchParams.delete('page');
+        }
+        window.location.href = url.toString();
+    }
+});
+</script>
+
+<style>
+.range-slider {
+    margin: 15px 0;
+}
+
+.noUi-connect {
+    background: #FFA41C;
+}
+
+.noUi-handle {
+    background: #FFA41C;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.noUi-handle:before,
+.noUi-handle:after {
+    display: none;
+}
+
+.noUi-target {
+    background: #E5E7EB;
+    border: none;
+    box-shadow: none;
+    height: 6px;
+}
+</style>
+{% endblock %}
