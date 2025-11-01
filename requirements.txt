@@ -1,15 +1,23 @@
+# Django
+Django==5.2.7
+
+# Authentication
 django-allauth==0.58.2
+
+# Forms
 django-crispy-forms==2.1
 crispy-bootstrap5==2023.10
+
+# Utilities
 django-countries==7.5.1
 python-dotenv==1.0.0
-Pillow==10.4.0
 dj-database-url==1.2.0
-gunicorn==21.2.0
-psycopg2-binary==2.9.9
 whitenoise==6.6.0
-django-import-export>=4.3.0
+gunicorn==21.2.0
+Pillow==10.4.0
+psycopg2-binary==2.9.9
+
+# Admin / import/export
+django-import-export==3.3.9
 django-admin-rangefilter==1.8
-
-
-
+django-admin-auto-filters==2.0.1
