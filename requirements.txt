@@ -9,5 +9,5 @@ gunicorn==21.2.0
 psycopg2-binary==2.9.9
 whitenoise==6.6.0
 django-import-export==3.3.9
-django-admin-rangefilter==1.8
+django-admin-rangefilter==0.13.3
 django-admin-auto-filters==2.0.1
