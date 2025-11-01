@@ -98,24 +98,29 @@ WSGI_APPLICATION = 'estore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+import dj_database_url
+import os
+from pathlib import Path
 
-# Pour production, utiliser PostgreSQL:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'estore',
-#         'USER': 'estore_user',
-#         'PASSWORD': 'securepassword',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+if os.environ.get('RENDER'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+
 
 
 # Password validation
@@ -267,8 +272,3 @@ CSRF_COOKIE_SECURE = False    # True en production avec HTTPS
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-
-# Stripe Payments (exemple)
-STRIPE_PUBLIC_KEY = 'your_stripe_public_key'
-STRIPE_SECRET_KEY = 'your_stripe_secret_key'
-STRIPE_WEBHOOK_SECRET = 'your_stripe_webhook_secret'
